@@ -1,0 +1,25 @@
+# OS / editor
+.DS_Store
+__pycache__/
+*.pyc
+
+# Local SQLite state (canonical structured brain)
+/state/brain.db
+/state/*.db
+/state/*.db-*
+/state/*.sqlite
+/state/*.sqlite3
+
+# Artifacts (keep README.md)
+/artifacts/*
+!/artifacts/README.md
+
+# Secrets (keep README.md and example.env)
+/secrets/*
+!/secrets/README.md
+!/secrets/example.env
+
+# Plaintext backups must never be committed
+/backups/*.db
+/backups/*.sqlite*
+/backups/*.tmp

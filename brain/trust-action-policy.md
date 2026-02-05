@@ -1,4 +1,4 @@
-# Trust & Action Policy (v1.0)
+# Trust & Action Policy (v2.0)
 
 This document defines action boundaries for OpenClaw.
 If an action is not explicitly allowed here, it is forbidden.
@@ -11,26 +11,46 @@ If an action is not explicitly allowed here, it is forbidden.
 Examples:
 - Read calendar
 - Read email metadata
-- Read existing brain files
+- Read existing brain files and projections
+- Read SQLite structured brain (`state/brain.db`)
 
 Status:
 - Allowed without confirmation
 
 ---
 
-### 1.2 Brain Write Actions
+### 1.2 Structured Brain Write Actions (SQLite)
 Examples:
-- Create or update markdown files
-- Append decision logs
-- Update workflows or ontology (with rules)
+- Append `events`
+- Insert/update `tasks`
+- Insert `decisions` (human or agent)
+- Insert/update `actions`
+- Insert/update `memories` rows (structured items and indexes)
 
 Status:
-- Allowed if compliant with Brain Canonical Schema
-- Must be logged when structural or semantic
+- Allowed only within the DB schema defined in `brain/db/`
+- Writes must be transactional
+- Any material change must create an `audit_logs` entry
+- `integrations.config` must be a pointer/path (never raw secrets)
+
+Guardrails (defaults):
+- Agent may append `events` without confirmation.
+- Agent may create tasks and move tasks to `todo`/`in-progress` without confirmation.
+- Marking tasks `done`/`cancelled` requires explicit user approval or an approved autonomy policy.
+- Updates to `memories.kind IN ('policy','config')` require explicit user approval.
+
+### 1.3 Markdown Brain Write Actions (Freeform)
+Examples:
+- Create/update Markdown notes under `brain/memory/**`
+- Update system specs under `brain/` (with governance rules)
+
+Status:
+- Allowed if compliant with `brain/README.md` and governance rules.
+- Projections are read-only: `brain/projections/**` must never be edited manually.
 
 ---
 
-### 1.3 Planning & Proposal Actions
+### 1.4 Planning & Proposal Actions
 Examples:
 - Propose schedules
 - Draft plans
@@ -43,7 +63,7 @@ Status:
 
 ---
 
-### 1.4 Local Execution Actions
+### 1.5 Local Execution Actions
 Examples:
 - File operations
 - Script execution
@@ -55,7 +75,7 @@ Status:
 
 ---
 
-### 1.5 External System Actions
+### 1.6 External System Actions
 Examples:
 - Draft emails
 - Modify calendar events
@@ -76,6 +96,13 @@ Status:
 
 No implied consent.
 No inferred trust escalation.
+
+---
+
+## 2.1 Secrets Handling (Non-Negotiable)
+
+- Secrets must live in `secrets/` (gitignored), never in committed Markdown or projections.
+- `integrations.config` must store only a pointer/key/path to the secret (never the secret itself).
 
 ---
 

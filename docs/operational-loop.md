@@ -17,16 +17,21 @@ This defines the minimal operating cycle for OpenClaw and the human operator.
 
 ## 4. Persist (Brain)
 - Convert outcomes to neutral, personality-free memory.
-- Store in the canonical `brain/` vault.
+- Structured objects (tasks/decisions/events/actions) go to SQLite: `state/brain.db`.
+- Freeform notes/specs go to Markdown under `brain/`.
 - Prefer update over new file creation.
+- Regenerate projections: `make projections`.
 
 ## 5. Log (Governance)
-- If a decision is made, append to `brain/decisions/decision_log.md`.
-- If memory or structure changes, update `brain/changelog.md`.
+- If a decision is made, store it in SQLite (`decisions`) and regenerate projections.
+- All material DB changes must have an `audit_logs` entry (via tooling/runtime).
+- If schema/spec changes, update `brain/changelog.md`.
 
 ## 6. Confirm (Interface)
 - Send a brief confirmation to the intake surface referencing where the outcome lives.
 
 ## 7. Review (Maintenance)
-- Periodically verify vault integrity with `scripts/validate_brain_schema.sh`.
+- Periodically verify repo integrity with `make validate`.
+- Periodically verify DB integrity with `make db-check`.
+- Regenerate projections with `make projections` when needed.
 - Perform the first-run self-test after bootstraps or major refactors.

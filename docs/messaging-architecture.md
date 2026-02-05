@@ -1,6 +1,6 @@
 # OpenClaw Messaging Architecture Guide
 
-**WhatsApp/Telegram as INBOX · Slack as WORKSPACE · Obsidian as BRAIN**
+**WhatsApp/Telegram as INBOX · Slack as WORKSPACE · Brain (SQLite+Markdown) as BRAIN**
 
 ---
 
@@ -31,8 +31,8 @@ WhatsApp/Telegram (INBOX)
 OpenClaw (Intent + Routing Engine)
   ↓
 ┌───────────────┬───────────────┬───────────────┐
-│ Slack         │ Obsidian      │ External      │
-│ (Workspace)   │ (Brain)       │ Services      │
+│ Slack         │ Brain         │ External      │
+│ (Workspace)   │ (SQLite+MD)   │ Services      │
 │               │               │ (Mail, Cal)   │
 └───────────────┴───────────────┴───────────────┘
   ↑
@@ -49,7 +49,7 @@ WhatsApp/Telegram (Confirmations / Notifications)
 |---|---|
 |WhatsApp/Telegram|Intake and notifications|
 |Slack|Thinking, discussion, execution|
-|Obsidian|Memory and knowledge|
+|Brain (SQLite+MD)|Memory and knowledge|
 
 Each layer has **non-overlapping duties**.
 
@@ -140,10 +140,10 @@ If no prefix is provided, OpenClaw infers intent.
 |---|---|
 |Scheduling|Calendar|
 |Email actions|Mail service|
-|Tasks|Slack + Obsidian|
+|Tasks|Slack + Brain (SQLite)|
 |Planning|Slack|
-|Notes / ideas|Obsidian|
-|Unknown|Obsidian Inbox|
+|Notes / ideas|Brain (Markdown + SQLite index)|
+|Unknown|Brain inbox (`brain/inbox.md`)|
 
 ---
 
@@ -293,49 +293,36 @@ OpenClaw must:
     
 3. Fan out execution to other channels
     
-4. Persist decision to Obsidian
+4. Persist decision to Brain (SQLite) and regenerate projections
     
 
 ---
 
-## 10. Obsidian: The OpenClaw BRAIN
+## 10. Brain: The OpenClaw BRAIN
 
 ### 10.1 Purpose
 
-Obsidian is the **single source of truth** for:
+The Brain (SQLite + Markdown) is the **single source of truth** for:
 
-- Decisions
-    
-- Tasks
-    
-- Knowledge
-    
-- Notes
-    
+- Structured objects in SQLite (`state/brain.db`): decisions, tasks, events, actions, audits
+- Freeform notes/specs in Markdown (`brain/`): knowledge notes, research notes, policies/specs
+- Generated views in `brain/projections/` (read-only)
 
 Slack is transient.  
 WhatsApp/Telegram is ephemeral.  
-Obsidian is permanent.
+The brain is permanent.
 
 ---
 
 ### 10.2 Suggested Vault Structure
 
-```
-/Inbox
-/Tasks
-  - active.md
-  - backlog.md
-/Decisions
-/Calendar
-/Notes
-```
+See `brain/README.md` for the canonical Markdown structure.
 
 ---
 
 ### 10.3 Persistence Rules
 
-OpenClaw writes to Obsidian when:
+OpenClaw persists to the Brain when:
 
 - A decision is finalized
     
@@ -344,6 +331,11 @@ OpenClaw writes to Obsidian when:
 - A summary is produced
     
 - Knowledge is generated
+
+Implementation rule of thumb:
+- Structured outcomes → write SQLite rows (`state/brain.db`) and record audits
+- Freeform outcomes → write Markdown notes under `brain/`
+- Regenerate views → `make projections`
     
 
 ---
@@ -405,7 +397,7 @@ Never for discussion.
     
 4. **Thread = Discussion**
     
-5. **Obsidian = Memory**
+5. **Brain (SQLite+MD) = Memory**
     
 6. **Discuss where the outcome lives**
     

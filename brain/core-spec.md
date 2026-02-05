@@ -74,9 +74,9 @@ OpenClaw is composed of **three strictly separated layers**.
 ### 2.3 Memory Layer (Brain)
 
 **Storage**
-- Obsidian vault (file + folder structure)
-- Markdown files only
-- Fully defined by the Brain README schema
+- Markdown brain (`brain/`) for freeform notes/specs (tags + wikilinks allowed)
+- SQLite DB (`state/brain.db`) for structured objects (tasks, decisions, events, actions, audits)
+- Markdown projections (`brain/projections/`) generated from SQLite for review
 
 **Characteristics**
 - Canonical
@@ -89,9 +89,11 @@ OpenClaw is composed of **three strictly separated layers**.
 - No emojis
 - No conversational tone
 - No opinions, jokes, or persona artifacts
-- Facts, decisions, rules, summaries only
+- Facts, decisions, rules, summaries only (personality-free)
 
-If information exists anywhere, it MUST exist here.
+If information is persisted, it MUST be represented in the canonical brain:
+- Structured objects → `state/brain.db`
+- Freeform knowledge/specs → `brain/` (Markdown)
 
 ---
 
@@ -136,7 +138,7 @@ All persisted data MUST be personality-free, even if derived from a personality-
 
 - Telegram replaces WhatsApp as the **single intake inbox**
 - Slack remains the **workspace**
-- Obsidian vault is the **brain**
+- `brain/` + `state/brain.db` is the **brain**
 
 There is **no other memory location**.
 
@@ -145,13 +147,13 @@ They are inputs and working surfaces only.
 
 ---
 
-## 6. Obsidian Vault Scope
+## 6. Brain Scope
 
-- The Obsidian vault IS the brain
-- All files and folders compose a single coherent knowledge system
-- The vault may be:
-  - Internal only
-  - Or selectively synced to a personal vault (TBD)
+- The canonical brain consists of:
+  - `brain/` (Markdown)
+  - `state/brain.db` (SQLite, gitignored)
+- `brain/projections/` is generated from SQLite and is read-only.
+- If you view/sync `brain/` in Obsidian, that is a UI choice; the structure and semantics remain unchanged.
 
 Regardless of sync decisions:
 - Structure
@@ -166,7 +168,9 @@ remain unchanged.
 The assistant is considered **correctly defined** only when:
 - A behavior maps to a layer
 - A layer maps to a surface
-- A persisted outcome maps to a brain file
+- A persisted outcome maps to the canonical brain:
+  - a Markdown file under `brain/`, or
+  - a row in `state/brain.db`
 
 If something does not fit:
 - It must be proposed
@@ -183,4 +187,4 @@ Personality makes it usable.
 Messaging makes it operable.  
 The brain makes it real.
 
-Anything outside these rules i
+Anything outside these rules is out of scope until explicitly modeled.

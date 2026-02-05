@@ -1,17 +1,41 @@
-# Routing Map (Draft)
+# Routing Map (Brain v2)
 
-This maps Slack domain channels to canonical memory locations in the brain vault.
+This maps Slack domain channels to canonical storage locations.
 
-## Channels → Brain Paths
-- `#openclaw-todo` → `brain/memory/short_term.md` (active tasks) and `brain/memory/long_term.md` (stable commitments)
-- `#openclaw-calendar` → `brain/memory/short_term.md` (near-term scheduling notes)
-- `#openclaw-mail-outlook` → `brain/memory/long_term.md` (rules, policies, summaries)
-- `#openclaw-mail-gmail` → `brain/memory/long_term.md` (rules, policies, summaries)
-- `#openclaw-mail-resumai` → `brain/memory/long_term.md` (rules, policies, summaries)
-- `#openclaw-obsidian` → `brain/ontology.md`, `brain/principles.md`, `brain/workflows/*`
-- `#openclaw-decisions` → `brain/decisions/decision_log.md`
-- `#openclaw-archive` → `brain/memory/archival_rules.md` (reference only)
+- Structured objects are canonical in SQLite (`state/brain.db`).
+- Freeform notes/specs are canonical in Markdown (`brain/`).
+- Projections are generated in `brain/projections/`.
+
+## Channels → Canonical Targets
+
+- `#openclaw-todo`:
+  - SQLite: `tasks`, `actions`, `events`
+  - Projections: `brain/projections/tasks/backlog.md`
+  - Notes: `brain/memory/short_term.md` (working notes), `brain/memory/long_term.md` (stable rules)
+
+- `#openclaw-decisions`:
+  - SQLite: `decisions`, `audit_logs`
+  - Projections: `brain/projections/decisions/recent.md`
+  - Notes/spec: `brain/decisions/decision_log.md` (legacy/templates only)
+
+- `#openclaw-calendar`:
+  - SQLite: `events` (calendar.*)
+  - Notes: `brain/memory/short_term.md` (near-term scheduling notes)
+
+- `#openclaw-mail-*` (outlook/gmail/resumai):
+  - SQLite: `events` (email.*), `memories` (rules/policies)
+  - Notes: `brain/memory/long_term.md` (mail rules and summaries)
+
+- `#openclaw-obsidian`:
+  - Markdown system spec: `brain/README.md`, `brain/core-spec.md`, `brain/ontology.md`, `brain/principles.md`, `brain/workflows/*`
+  - DB spec: `brain/db/**`
+
+- `#openclaw-archive`:
+  - Policy: `brain/memory/archival_rules.md`
+  - Projections: `brain/projections/system/*` (optional operational views)
 
 ## Notes
-- Decisions are always logged in `brain/decisions/decision_log.md`.
-- If an outcome becomes canonical, it must be written to the brain and logged.
+- Do not treat Slack as storage.
+- Decisions and tasks are canonical in SQLite and should appear in projections after `make projections`.
+- Freeform reasoning summaries can live as Markdown notes, but structured outcomes must be in SQLite.
+

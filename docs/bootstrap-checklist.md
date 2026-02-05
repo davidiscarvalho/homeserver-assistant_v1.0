@@ -1,28 +1,38 @@
-# Bootstrap Checklist
+# Bootstrap Checklist (Brain v2)
 
 Say: "Check bootstrap" and verify each item below.
 
-## 1. Schema Integrity
+## 1. Repo Schema Integrity
 - Run: `make validate`
-- Expected: OK message, no missing or unexpected files
+- Expected: OK message, no missing required files/dirs
 
-## 2. First-Run Self-Test
+## 2. Secrets Setup (Local)
+- Create `secrets/openclaw.env` (gitignored) with real values (use `secrets/example.env` as a template).
+- Confirm `git status` does not show any secrets files.
+
+## 3. SQLite Init
+- Run: `make db-init`
+- Expected: creates `state/brain.db` (gitignored)
+
+## 4. SQLite Health
+- Run: `make db-check`
+- Expected: `integrity_check` ok; required tables exist
+
+## 5. Generate Projections
+- Run: `make projections`
+- Expected: updates `brain/projections/**` (generated, read-only)
+
+## 6. First-Run Self-Test
 - Follow: `docs/first-run-self-test.md`
-- If any check fails, log it as a decision and note the fix.
+- If any check fails, log it and fix it before continuing.
 
-## 3. Initial Decision Log
-- Run: `scripts/new_decision_entry.sh`
-- Record: "Initialized OpenClaw in homeserver environment" (or equivalent)
+## 7. Encrypted Backup (Recommended)
+- Install `age` and set `AGE_RECIPIENT` (see `secrets/example.env`)
+- Run: `make backup`
+- Expected: `backups/brain-YYYYMMDD.db.age` created
 
-## 4. Changelog Entry
-- Append to: `brain/changelog.md`
-- Example: "2026-02-04 — OpenClaw bootstrapped and validated"
-
-## 5. Operational Loop Ready
-- Confirm: `docs/operational-loop.md` exists and is understood
-- Confirm: `docs/routing-map.md` maps Slack channels to brain paths
-
-## 6. Governance Baseline
-- Confirm: `docs/governance.md` exists and has been read
+## 8. Governance Baseline
+- Confirm: `docs/governance.md` exists and has been read.
+- Confirm: `docs/operational-loop.md` and `docs/routing-map.md` reflect the DB + Markdown split.
 
 If all items pass, the system is considered initialized.

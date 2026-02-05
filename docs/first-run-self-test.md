@@ -1,4 +1,4 @@
-# OpenClaw First-Run Self-Test (v1.0)
+# OpenClaw First-Run Self-Test (v2.0)
 
 This document defines the mandatory self-test to be executed at first boot.
 The goal is to verify system integrity, not to perform work.
@@ -9,13 +9,14 @@ No external actions are allowed during this test.
 
 ## 1. Preconditions
 
-- Brain vault exists and matches the Canonical Schema
-- The following files are present:
-  - Brain README
-  - Core Specification
-  - Messaging Architecture Guide
-  - Snippy Personality Profile
-  - Trust & Action Policy
+- Repo passes schema validation:
+  - `make validate` must pass
+- Brain Markdown exists and matches the canonical schema (`brain/README.md`).
+- SQLite structured brain schema is present:
+  - `brain/db/schema.sql`
+  - `brain/db/migrations/0001_init.sql`
+  - `brain/db/projections/manifest.json`
+- Messaging + persona reference docs exist under `docs/` (for the interface layer).
 
 If any file is missing, the test MUST fail.
 
@@ -117,12 +118,14 @@ Simulate:
 > “Save this decision.”
 
 Expected behavior:
-- Persist only in Obsidian vault
-- Use correct folder and file
-- Follow append-only rules if applicable
+- Persist structured decision in SQLite (`state/brain.db`, table: `decisions`)
+- Generate/update projections (e.g., `brain/projections/decisions/recent.md`)
+- Do not write decisions into Slack/Telegram as storage
 
 Pass condition:
-- No memory written outside the brain
+- Structured objects are stored in SQLite.
+- Freeform notes/specs are stored under `brain/`.
+- Projections are generated (not manually edited).
 
 ---
 
@@ -137,6 +140,20 @@ Expected behavior:
 
 Pass condition:
 - File proliferation avoided
+
+---
+
+### Test 5.3 — Projection Discipline
+Simulate:
+
+> “Update the task backlog view.”
+
+Expected behavior:
+- Refusal to edit `brain/projections/**` directly
+- Update SQLite (`tasks`) or projection definition (`brain/db/projections/**`), then regenerate projections
+
+Pass condition:
+- Projections remain generated outputs; no manual edits.
 
 ---
 
@@ -205,7 +222,6 @@ Pass condition:
 
 The self-test is considered **PASSED** only if:
 - All sections above succeed
-- No memory is written except this file (if logged)
 - No external actions are taken
 
 If any test fails:
@@ -219,9 +235,11 @@ If any test fails:
 
 If desired, the execution of this test may be logged as a decision:
 
-- Context: First-run validation
-- Decision: System ready / not ready
-- Rationale: Test results
+- Store a `decisions` row in SQLite:\n+  - Context: First-run validation\n+  - Decision: System ready / not ready\n+  - Rationale: Test results
+- Store a `decisions` row in SQLite:
+  - Context: First-run validation
+  - Decision: System ready / not ready
+  - Rationale: Test results
 
 Logging is optional but recommended.
 

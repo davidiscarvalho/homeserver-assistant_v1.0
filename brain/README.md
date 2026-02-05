@@ -1,4 +1,4 @@
-# OpenClaw Brain — Canonical Schema (v1.0)
+# OpenClaw Brain — Canonical Schema (v2.0)
 
 This document defines the **authoritative brain architecture** for OpenClaw.  
 All persistent memory, reasoning artifacts, and operational knowledge **MUST** conform to this structure.
@@ -10,10 +10,10 @@ If any instruction, prompt, or agent behavior conflicts with this document, **th
 
 ## 1. Design Principles
 
-1. **Filesystem = Brain**
-   - Knowledge is stored as Markdown files.
-   - Folders define semantic boundaries.
-   - File paths are meaningful and stable.
+1. **Split-Authority Brain**
+   - `brain/` (Markdown) is canonical for freeform writing: notes, research, policies/specs, tags, wikilinks.
+   - `state/brain.db` (SQLite, gitignored) is canonical for structured objects: tasks, decisions, events, actions, audits.
+   - `brain/projections/` (Markdown) is generated from SQLite and is read-only.
 
 2. **Obsidian-Compatible**
    - Plain Markdown only (`.md`)
@@ -40,24 +40,43 @@ If any instruction, prompt, or agent behavior conflicts with this document, **th
 ```
 brain/
 ├─ README.md # This file (authoritative schema)
+├─ core-spec.md # Authority & system model
 ├─ principles.md # Core values, non-negotiables
 ├─ ontology.md # Concepts, entities, tags, relationships
-├─ inbox.md # Raw captures before promotion
+├─ trust-action-policy.md # Action boundaries and approvals
+├─ inbox.md # Raw captures before promotion (freeform)
 │
 ├─ workflows/ # How OpenClaw thinks and acts
 │ ├─ thinking.md
 │ ├─ planning.md
 │ └─ execution.md
 │
-├─ memory/ # Persistent memory layers
+├─ memory/ # Canonical freeform notes (human-authored)
 │ ├─ short_term.md
 │ ├─ long_term.md
 │ └─ archival_rules.md
-│ └─ entry-template.md
-│ └─ entry-template.md
+│ ├─ entry-template.md
+│ └─ research/
 │
-├─ decisions/ # Logged decisions with rationale
-│ └─ decision_log.md
+├─ decisions/ # Decision-related docs (see also projections)
+│ └─ decision_log.md # Legacy MD log / templates (SQLite is canonical)
+│
+├─ db/ # SQLite schema + projection definitions (text-only)
+│ ├─ README.md
+│ ├─ schema.sql
+│ ├─ migrations/
+│ └─ projections/
+│    ├─ manifest.json
+│    ├─ queries/
+│    └─ templates/
+│
+├─ projections/ # Generated Markdown views (read-only)
+│ ├─ tasks/
+│ ├─ decisions/
+│ ├─ daily/
+│ ├─ weekly/
+│ ├─ system/
+│ └─ research/
 │
 └─ changelog.md # All brain changes (append-only)
 ```
@@ -137,6 +156,34 @@ Defines:
 
 ---
 
+### `/db/`
+Text-only definition of the structured brain DB:
+- `schema.sql` and `migrations/` define the canonical schema for `state/brain.db`
+- `projections/` defines deterministic exports from SQLite → Markdown
+
+This folder is part of the system specification (committed), not runtime state.
+
+---
+
+### `/projections/`
+Generated Markdown views exported from SQLite (`state/brain.db`).
+
+Rules:
+- Read-only (generated files)
+- If output is wrong: change DB or projection definition and re-run
+- No secrets
+
+---
+
+## 3.5 Repo-Level State (Outside `brain/`)
+
+- `state/brain.db` — live SQLite DB (gitignored)
+- `backups/*.age` — encrypted DB snapshots (committed)
+- `artifacts/` — binary outputs (gitignored)
+- `secrets/` — credentials and keys (gitignored except templates)
+
+---
+
 ### `/decisions/decision_log.md`
 Append-only log.
 
@@ -204,11 +251,10 @@ If unsure → **update, do not create**.
 
 ---
 
-## 7. Interaction With Obsidian-Shared Vault
+## 7. Interaction With Obsidian (Optional UI)
 
-- Files under `brain/` are **internal**
-- Shared Obsidian vault is **external-facing**
-- Knowledge may be summarized or linked, but:
+- `brain/` is plain Markdown and can be viewed in Obsidian, but no `.obsidian/` setup is required.
+- If you share or publish notes, it must be curated explicitly:
   - Internal reasoning stays internal
   - No raw brain dumps into shared notes
 
@@ -223,7 +269,9 @@ OpenClaw MUST NOT:
 - Change this schema silently
 - Delete files
 - Rewrite append-only logs
-- Store memory outside this structure
+- Write to `brain/projections/**` directly (projections are generated)
+- Store structured canonical objects outside `state/brain.db`
+- Store secrets in committed files (use `secrets/` and gitignore)
 
 ---
 

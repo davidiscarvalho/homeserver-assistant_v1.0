@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "projections": [
+    {
+      "name": "tasks_backlog",
+      "title": "Task Backlog",
+      "query": "queries/tasks_backlog.sql",
+      "output": "brain/projections/tasks/backlog.md"
+    },
+    {
+      "name": "decisions_recent",
+      "title": "Recent Decisions (7 days)",
+      "query": "queries/decisions_recent.sql",
+      "output": "brain/projections/decisions/recent.md"
+    },
+    {
+      "name": "system_events_24h",
+      "title": "System Events (24h)",
+      "query": "queries/system_events_24h.sql",
+      "output": "brain/projections/system/events-24h.md"
+    },
+    {
+      "name": "audit_changes_24h",
+      "title": "Audit Changes (24h)",
+      "query": "queries/audit_changes_24h.sql",
+      "output": "brain/projections/system/audit-24h.md"
+    },
+    {
+      "name": "research_index",
+      "title": "Research Index",
+      "query": "queries/research_index.sql",
+      "output": "brain/projections/research/index.md"
+    }
+  ]
+}
